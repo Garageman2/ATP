@@ -41,13 +41,17 @@ class Player:
         self.name = name
         self.base_url, html = Player.query_player(name)
         info = html.find("div",class_="player-profile-hero-table")
-        for c in info.descendants:
-        #look for class table value
-            if hasattr(c,"attrs"):
-                if "class" in c.attrs:
-                    if 'table-value' in c["class"] or 'table-big-value' in c["class"]:
-                        print(c.contents)
-
+        wraps = [x for x in info.descendants if hasattr(x,"attrs") and "class" in x.attrs and "wrap" in x["class"]]
+        for wrap in wraps:
+            try:
+                print(len(wrap.contents))
+                for div in [ x for x in wrap.contents if x != '\n']:
+                    if "table-big-value" in div["class"]:
+                        pass
+                    elif "table-value" in div["class"]:
+                        pass
+            except AttributeError:
+                pass
 
 
     def __str__(self):
