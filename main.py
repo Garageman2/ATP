@@ -1,12 +1,28 @@
+import time
+
 from bs4 import BeautifulSoup
 import requests
+from splinter import Browser
 
 #!Seems to require the request coming from the US
 
 def construct_url(name:str):
     base = "https://www.atptour.com/en/players"
-    name = name.strip().lower().replace(" ","-")
+    editname = name.strip().lower().replace(" ","-")
     print(name)
+    with Browser() as browser:
+        browser.visit(base)
+        pSearch = browser.find_by_id("playerInput")
+        pSearch.fill(name)
+        pSearch.click()
+        time.sleep(2.0)
+        pDropdown = browser.find_by_id("playerDropdown")
+        for link in browser.find_by_tag('a'):
+            if link.value == name:
+                print(link.value)
+                link.click()
+                break
+        input()
 
 def main():
     link = "https://www.atptour.com/en/players/carlos-alcaraz/a0e2/titles-and-finals"
