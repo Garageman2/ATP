@@ -1,8 +1,12 @@
 import time
 import requests
+from selenium.webdriver import Chrome
 from splinter import Browser
 from bs4 import BeautifulSoup
 from enum import Enum
+from datetime import date
+from dateutil import relativedelta
+
 
 class Player_Url(Enum):
     OVERVIEW = "overview"
@@ -27,7 +31,7 @@ class Player:
         base = "https://www.atptour.com/en/players"
         editname = name.strip().lower().replace(" ", "-")
         print(name)
-        with Browser() as browser:
+        with Browser('chrome') as browser:
             browser.visit(base)
             pSearch = browser.find_by_id("playerInput")
             pSearch.fill(name)
@@ -50,7 +54,13 @@ class Player:
             edit_var = None
             for div in [ x for x in wrap.contents if x != '\n']:
                 match div["class"]:
-                    case ["table-big-value"]: print("Big");# print(div.contents)
+                    case ["table-big-value"]:
+                        if div.span != None:
+                            data = div.span.text.strip()
+                            match data[-1]:
+                                case '\"': self.height = data;
+                                case ')': birthdate = data[1:-1].split("."); self.age = relativedelta.relativedelta(date.today(),date(int(birthdate[0]),int(birthdate[1]),int(birthdate[2]))).years;
+                                case 's': self.weight = int(data[:-3]);
                     case ["table-value"]:
                         match edit_var:
                             case self.country:
