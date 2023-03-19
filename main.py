@@ -3,7 +3,8 @@ from player import Player
 #!Seems to require the request coming from the US
 
 def main():
-    Player("Jannik Sinner")
+    j = Player("Jannik Sinner")
+    print("pass")
 
 
 # Press the green button in the gutter to run the script.

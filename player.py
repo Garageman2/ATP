@@ -17,6 +17,10 @@ class Player_Url(Enum):
 
 class Player:
 
+    country = None
+    hand = None
+    backhand = None
+
     #TODO: set config to headless for release
     @staticmethod
     def query_player(name: str):
@@ -43,15 +47,26 @@ class Player:
         info = html.find("div",class_="player-profile-hero-table")
         wraps = [x for x in info.descendants if hasattr(x,"attrs") and "class" in x.attrs and "wrap" in x["class"]]
         for wrap in wraps:
-            try:
-                print(len(wrap.contents))
-                for div in [ x for x in wrap.contents if x != '\n']:
-                    if "table-big-value" in div["class"]:
-                        pass
-                    elif "table-value" in div["class"]:
-                        pass
-            except AttributeError:
-                pass
+            edit_var = None
+            for div in [ x for x in wrap.contents if x != '\n']:
+                match div["class"]:
+                    case ["table-big-value"]: print("Big");# print(div.contents)
+                    case ["table-value"]:
+                        match edit_var:
+                            case self.country:
+                                print(div.contents[0].strip())
+                                self.country = div.contents[0].split(", ")[1]
+                            case self.hand:
+                                print(div.contents[0].strip())
+                                self.hand = div.contents[0].strip().split("-")[0]
+                                self.backhand = div.contents[0].strip().split(" ")[1].strip()
+
+                    case ["table-label"]:
+                        print("label")
+                        match div.contents[0].strip():
+                            case "Birthplace": edit_var = self.country
+                            case "Plays": edit_var = self.hand
+
 
 
     def __str__(self):
