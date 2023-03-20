@@ -1,6 +1,5 @@
 import time
 import requests
-from selenium.webdriver import Chrome
 from splinter import Browser
 from bs4 import BeautifulSoup
 from enum import Enum
@@ -30,8 +29,7 @@ class Player:
     def query_player(name: str):
         base = "https://www.atptour.com/en/players"
         editname = name.strip().lower().replace(" ", "-")
-        print(name)
-        with Browser('chrome') as browser:
+        with Browser('chrome', headless=True) as browser:
             browser.visit(base)
             pSearch = browser.find_by_id("playerInput")
             pSearch.fill(name)
@@ -82,9 +80,9 @@ class Player:
         #TODO: get recent win-loss information
         self.base_url = self.base_url[:-9]
         self.uuid = self.base_url[-4:]
-        print(self.swap_link(Player_Url.TITLES_FINALS))
-        #TODO: Curl and parse
-
+        #TODO: Parse Titles
+        html = BeautifulSoup(requests.get(self.swap_link(Player_Url.TITLES_FINALS)).text,features='html.parser')
+        print(html)
 
     def __str__(self):
         return self.name;
