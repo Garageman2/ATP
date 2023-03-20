@@ -4,7 +4,6 @@ from player import Player
 
 def main():
     j = Player("Jannik Sinner")
-    print("pass")
 
 
 # Press the green button in the gutter to run the script.

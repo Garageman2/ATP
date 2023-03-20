@@ -44,12 +44,14 @@ class Player:
                     link.click()
                     return browser.url, BeautifulSoup(browser.html,features='html.parser')
 
+    def swap_link(self,variant:Player_Url):
+        return self.base_url + "/" + variant.value
 
     def __init__(self, name:str):
         self.name = name
         self.base_url, html = Player.query_player(name)
-        info = html.find("div",class_="player-profile-hero-table")
-        wraps = [x for x in info.descendants if hasattr(x,"attrs") and "class" in x.attrs and "wrap" in x["class"]]
+        hero_table = html.find("div",class_="player-profile-hero-table")
+        wraps = [x for x in hero_table.descendants if hasattr(x,"attrs") and "class" in x.attrs and ("wrap" in x["class"])]
         for wrap in wraps:
             edit_var = None
             for div in [ x for x in wrap.contents if x != '\n']:
@@ -76,10 +78,13 @@ class Player:
                         match div.contents[0].strip():
                             case "Birthplace": edit_var = self.country
                             case "Plays": edit_var = self.hand
-
+        self.rank = int(html.find(class_="data-number").contents[0].strip())
+        #TODO: get recent win-loss information
+        self.base_url = self.base_url[:-9]
+        self.uuid = self.base_url[-4:]
+        print(self.swap_link(Player_Url.TITLES_FINALS))
+        #TODO: Curl and parse
 
 
     def __str__(self):
         return self.name;
-
-
