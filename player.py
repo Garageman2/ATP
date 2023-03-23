@@ -23,6 +23,10 @@ class Player:
     country = None
     hand = None
     backhand = None
+    titles = []
+    slams = 0
+    masters = 0
+    career_high = 0
 
     #TODO: set config to headless for release
     @staticmethod
@@ -38,14 +42,13 @@ class Player:
             pDropdown = browser.find_by_id("playerDropdown")
             for link in browser.find_by_tag('a'):
                 if link.value == name:
-                    print(link.value)
                     link.click()
                     return browser.url, BeautifulSoup(browser.html,features='html.parser')
 
     def swap_link(self,variant:Player_Url):
         return self.base_url + "/" + variant.value
 
-    def __init__(self, name:str):
+    def __init__(self, name: str) -> object:
         self.name = name
         self.base_url, html = Player.query_player(name)
         hero_table = html.find("div",class_="player-profile-hero-table")
@@ -64,25 +67,35 @@ class Player:
                     case ["table-value"]:
                         match edit_var:
                             case self.country:
-                                print(div.contents[0].strip())
                                 self.country = div.contents[0].split(", ")[1]
                             case self.hand:
-                                print(div.contents[0].strip())
                                 self.hand = div.contents[0].strip().split("-")[0]
                                 self.backhand = div.contents[0].strip().split(" ")[1].strip()
 
                     case ["table-label"]:
-                        print("label")
                         match div.contents[0].strip():
                             case "Birthplace": edit_var = self.country
                             case "Plays": edit_var = self.hand
+
+        self.career_high = int(html.find_all(lambda tag: tag.name =="div" and "Career High" in tag.text)[-1].parent.div.contents[0].strip())
+
         self.rank = int(html.find(class_="data-number").contents[0].strip())
         #TODO: get recent win-loss information
         self.base_url = self.base_url[:-9]
         self.uuid = self.base_url[-4:]
         #TODO: Parse Titles
         html = BeautifulSoup(requests.get(self.swap_link(Player_Url.TITLES_FINALS)).text,features='html.parser')
-        print(html)
+        for link in [x for x in html.find(id="singlesTitles").descendants if x.name=="a"]:
+            self.titles.append(link.contents[0].strip())
+        #todo: MATCH TITLES FOR MASTERS AND SLAMS
+        for title in self.titles:
+            match title:
+                case "US Open": self.slams += 1
+                case "Roland Garros": self.slams += 1
+                case "Wimbledon": self.slams += 1
+                case "Australian Open": self.slams += 1
+            if "ATP Masters 1000" in title: self.masters += 1
+
 
     def __str__(self):
-        return self.name;
+        return self.name + " is " + str(self.age) + " and has " + str(self.slams + self.masters) + " major titles";
