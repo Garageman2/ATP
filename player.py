@@ -27,12 +27,12 @@ class Player:
     slams = 0
     masters = 0
     career_high = 0
+    web_name = None
 
     #TODO: set config to headless for release
     @staticmethod
     def query_player(name: str):
         base = "https://www.atptour.com/en/players"
-        editname = name.strip().lower().replace(" ", "-")
         with Browser('chrome', headless=True) as browser:
             browser.visit(base)
             pSearch = browser.find_by_id("playerInput")
@@ -50,6 +50,7 @@ class Player:
 
     def __init__(self, name: str) -> object:
         self.name = name
+        self.web_name = self.name.strip().lower().replace(" ", "-")
         self.base_url, html = Player.query_player(name)
         hero_table = html.find("div",class_="player-profile-hero-table")
         wraps = [x for x in hero_table.descendants if hasattr(x,"attrs") and "class" in x.attrs and ("wrap" in x["class"])]
@@ -83,11 +84,9 @@ class Player:
         #TODO: get recent win-loss information
         self.base_url = self.base_url[:-9]
         self.uuid = self.base_url[-4:]
-        #TODO: Parse Titles
         html = BeautifulSoup(requests.get(self.swap_link(Player_Url.TITLES_FINALS)).text,features='html.parser')
         for link in [x for x in html.find(id="singlesTitles").descendants if x.name=="a"]:
             self.titles.append(link.contents[0].strip())
-        #todo: MATCH TITLES FOR MASTERS AND SLAMS
         for title in self.titles:
             match title:
                 case "US Open": self.slams += 1

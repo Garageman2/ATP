@@ -3,6 +3,7 @@ import sys
 
 from player import Player
 from threading import Thread
+from head2head import Head2Head
 from time import sleep
 
 loading = False
@@ -36,7 +37,8 @@ def build_h2h():
     p2 = Player(name2);
     loading = False;
     thread.join();
-    print(p1,"\n",p2)
+    print(p1,"\n", p2)
+    print(Head2Head(p1,p2))
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
