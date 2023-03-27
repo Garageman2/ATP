@@ -38,7 +38,7 @@ class Player:
             pSearch = browser.find_by_id("playerInput")
             pSearch.fill(name)
             pSearch.click()
-            time.sleep(2.0)
+            time.sleep(1.0)
             pDropdown = browser.find_by_id("playerDropdown")
             for link in browser.find_by_tag('a'):
                 if link.value == name:

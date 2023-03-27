@@ -26,9 +26,11 @@ def print_prog():
 def main():
     build_h2h()
 
+#TODO: Scrape the rankings and create a 100x100 table of the top 100
+
 def build_h2h():
-    name1 = input("Enter Player 1's name as spelled in English: ")
-    name2 = input("Enter Player 2's name as spelled in English: ")
+    name1 = input("Enter Player 1's name as spelled in English: ").title()
+    name2 = input("Enter Player 2's name as spelled in English: ").title()
     global loading
     loading = True
     thread = Thread(target=lambda: print_prog())

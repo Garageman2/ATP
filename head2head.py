@@ -10,8 +10,9 @@ class Head2Head:
     p2_name:str = None
     p1_wins:str = None
     p2_wins:str = None
-    Matches:int = None
+    matches:int = None
     most_recent = None
+    late_round:int = 0
 
     def __init__(self, p1:Player,p2:Player) -> object:
         self.p1_name = p1.name
@@ -28,6 +29,22 @@ class Head2Head:
             match class_[0]:
                 case "h2h-player-left": self.p1_wins = w
                 case "h2h-player-right": self.p2_wins = w
+        self.matches = self.p1_wins + self.p2_wins
+        if self.matches > 0:
+            table = html.find(class_="modal-event-breakdown-table").tbody
+            for child in [x for x in table.children if hasattr(x,"children")]:
+                iterc = child.children
+                next(iterc) #this advances to the date
+                next(iterc)
+                next(iterc)#this one gives places
+                next(iterc)
+                next(iterc)#surface
+                next(iterc)
+                next(iterc)
+                if next(iterc).text.strip() in ["QF", "SF", "F"]: self.late_round += 1
+            print(self.late_round)
+
+
 
     def __str__(self):
         return self.p1_name + " has a h2h of " + str(self.p1_wins) + " - " + str(self.p2_wins) + " with " + self.p2_name
