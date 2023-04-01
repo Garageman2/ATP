@@ -17,7 +17,6 @@ class Player_Url(Enum):
     RANKINGS_BREAKDOWN = "rankings_breakdown"
 
 
-
 class Player:
 
     country = None
@@ -30,7 +29,6 @@ class Player:
     web_name = None
     active:bool = True
 
-    #TODO: set config to headless for release
     @staticmethod
     def query_player(name: str):
         base = "https://www.atptour.com/en/players"
@@ -50,6 +48,7 @@ class Player:
         return self.base_url + "/" + variant.value
 
     def __init__(self, name: str) -> object:
+        self.titles = []
         found = False
         while not found:
             self.name = name
@@ -98,7 +97,7 @@ class Player:
         self.base_url = self.base_url[:-9]
         self.uuid = self.base_url[-4:]
         html = BeautifulSoup(requests.get(self.swap_link(Player_Url.TITLES_FINALS)).text,features='html.parser')
-        for link in [x for x in html.find(id="singlesTitles").descendants if x.name=="a"]:
+        for link in [x for x in html.find(id="singlesTitles").descendants if x.name =="a"]:
             self.titles.append(link.contents[0].strip())
         for title in self.titles:
             match title:
@@ -107,7 +106,6 @@ class Player:
                 case "Wimbledon": self.slams += 1
                 case "Australian Open": self.slams += 1
             if "ATP Masters 1000" in title: self.masters += 1
-
 
     def __str__(self):
         return self.name + " is " + str(self.age) + " and has " + str(self.slams + self.masters) + " major titles";

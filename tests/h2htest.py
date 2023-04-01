@@ -14,6 +14,9 @@ class MyTestCase(unittest.TestCase):
             Sascha = Player("Sascha Zverev")
             self.assertEqual(Sascha.name,"Alexander Zverev")
 
+    def slam_count(self):
+        self.assertEqual(Player("Roger Federer").slams, 20)
+        self.assertEqual(Player("Gael Monfils").slams, 0)
 
 if __name__ == '__main__':
     unittest.main()
