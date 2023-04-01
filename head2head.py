@@ -134,4 +134,4 @@ class Head2Head:
 
         self.score = round(self.score, 3)
         print(self.score, "score")
-        # TODO: score streak, age
+        # TODO: score streak, reddit hype, similar titles
