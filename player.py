@@ -28,6 +28,7 @@ class Player:
     masters = 0
     career_high = 0
     web_name = None
+    active:bool = True
 
     #TODO: set config to headless for release
     @staticmethod
@@ -49,9 +50,16 @@ class Player:
         return self.base_url + "/" + variant.value
 
     def __init__(self, name: str) -> object:
-        self.name = name
-        self.web_name = self.name.strip().lower().replace(" ", "-")
-        self.base_url, html = Player.query_player(name)
+        found = False
+        while not found:
+            self.name = name
+            self.web_name = self.name.strip().lower().replace(" ", "-")
+            try:
+                self.base_url, html = Player.query_player(name)
+            except TypeError:
+                name = input(name + " not found. Please check the name and enter it again: ")
+            else:
+                found = True
         hero_table = html.find("div",class_="player-profile-hero-table")
         wraps = [x for x in hero_table.descendants if hasattr(x,"attrs") and "class" in x.attrs and ("wrap" in x["class"])]
         for wrap in wraps:
@@ -80,7 +88,12 @@ class Player:
 
         self.career_high = int(html.find_all(lambda tag: tag.name =="div" and "Career High" in tag.text)[-1].parent.div.contents[0].strip())
 
-        self.rank = int(html.find(class_="data-number").contents[0].strip())
+        rank_elem = html.find(class_="data-number").contents[0].strip()
+        if rank_elem == '':
+            self.active = False
+            self.rank = self.career_high
+        else:
+            self.rank = int(rank_elem)
         #TODO: get recent win-loss information
         self.base_url = self.base_url[:-9]
         self.uuid = self.base_url[-4:]
