@@ -1,15 +1,31 @@
 import math
-
+from typing import Callable
 from player import Player
 from bs4 import BeautifulSoup
 import requests
 
 
 class H2HConfig:
-    country = 1
-    match_threshold = 5
-    equal = 1
+    country: int = 1
+    match_threshold: int = 5
+    equal: int = 3
+    slam_threshold: int = 1
+    have_slam: int = 1
+    slam_count_calc: Callable[[int], int] = None
+    masters_threshold:int = 3
+    have_masters = .5
+    masters_count_calc: Callable[[int], int] = None
 
+    def __init__(self):
+        self.slam_count_calc = self.default_slam_count
+
+    @classmethod
+    def default_slam_count(self,slams:int) -> int:
+        return math.log(slams, 2)
+
+    @classmethod
+    def default_masters_count(self,slams:int) -> int:
+        return math.log(slams, 5)
 
 class Head2Head:
     link: str = None
@@ -65,9 +81,9 @@ class Head2Head:
         score = 0
 
         # metric to measure equality of head to head
-        angle = round(math.atan2(float(self.p1_wins), float(self.p2_wins)),3)
-        #TODO: distance from 45 will be max 45. Find distance, do a one minus operation, maybe the distance divided by .45, then the absolute value and mult by score for equality
-        print("Angle ", angle)
+        angle = math.degrees(round(math.atan2(float(self.p1_wins), float(self.p2_wins)),3))
+        score += (1 - (abs(45-angle)/45)) * self.config.equal
+        #finds proportion of max dist, .45, then subtracts from one to find closeness
 
         if self.matches >= self.config.match_threshold:
             score = self.config.equal * .5
@@ -77,4 +93,14 @@ class Head2Head:
         if self.p1.country == self.p2.country:
             score += self.config.country
 
+        if self.p1.slams >= self.config.slam_threshold and self.p2.slams >- self.config.slam_threshold:
+            score += self.config.have_slam
+            slams = self.p1.slams + self.p2.slams
+            score += self.config.slam_count_calc()
+
+        if self.p1.masters >= self.config.masters_threshold and self.p2.masters >- self.config.masters_threshold:
+            score += self.config.have_masters
+            score += self.config.masters_count_calc(((self.p1.masters + self.p2.masters)))
+
+        print(score, " score")
         # TODO: score slams, masters, career high, rank, streak, age
