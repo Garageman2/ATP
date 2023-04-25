@@ -6,6 +6,10 @@ from threading import Thread
 from head2head import Head2Head
 from time import sleep
 
+
+from bs4 import BeautifulSoup
+import requests
+
 loading = False
 
 #!Seems to require the request coming from the US

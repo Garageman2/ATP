@@ -29,6 +29,7 @@ class Player:
     career_high = 0
     web_name = None
     active:bool = True
+    elo:float = 0
 
     #TODO: set config to headless for release
     @staticmethod
@@ -107,7 +108,22 @@ class Player:
                 case "Wimbledon": self.slams += 1
                 case "Australian Open": self.slams += 1
             if "ATP Masters 1000" in title: self.masters += 1
+        if self.active:
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:55.0) Gecko/20100101 Firefox/55.0',
+            }
+            elo_html = BeautifulSoup(
+                requests.get("https://tennisabstract.com/reports/atp_elo_ratings.html", headers=headers).text,
+                features='html.parser')
+            for child in elo_html.body.find_all('table')[3].table.contents[1:]:
+                td_elements = child.find_all('td')
+                test_name = str(td_elements[1].a.text).strip().title().replace(u'\xa0', u' ')
+                print(ascii(test_name),ascii(self.name))
+                if str(test_name.strip()) == self.name.strip():
+                    self.elo = td_elements[3].contents[0]
+                    print(self.name,"'s ELO is ",self.elo)
+                    break
 
 
     def __str__(self):
-        return self.name + " is " + str(self.age) + " and has " + str(self.slams + self.masters) + " major titles";
+        return self.name + " is " + str(self.age) + " and has " + str(self.slams + self.masters) + " major titles and an ELO of" + str(self.elo);

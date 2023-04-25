@@ -15,9 +15,16 @@ class H2HConfig:
     masters_threshold:int = 3
     have_masters = .5
     masters_count_calc: Callable[[int], int] = None
+    CH_diff:int = 5
+    CH_similarity = .5
+    rank_diff:int = 5
+    rank_similarity = .75
+    generation_size:int = 5
+    generation_score:float = .75
 
     def __init__(self):
         self.slam_count_calc = self.default_slam_count
+        self.masters_count_calc = self.default_masters_count
 
     @classmethod
     def default_slam_count(self,slams:int) -> int:
@@ -85,22 +92,39 @@ class Head2Head:
         score += (1 - (abs(45-angle)/45)) * self.config.equal
         #finds proportion of max dist, .45, then subtracts from one to find closeness
 
+        #rewards many matches
         if self.matches >= self.config.match_threshold:
             score = self.config.equal * .5
             if (self.p1_wins != 0) and (self.p2_wins != 0):
                 score += self.config.equal * .5 * (min(self.p2_wins, self.p1_wins) / max(self.p2_wins, self.p1_wins))
 
+        #rewards country matching
         if self.p1.country == self.p2.country:
             score += self.config.country
 
-        if self.p1.slams >= self.config.slam_threshold and self.p2.slams >- self.config.slam_threshold:
+        #rewards slam winners
+        if self.p1.slams >= self.config.slam_threshold and self.p2.slams >= self.config.slam_threshold:
             score += self.config.have_slam
             slams = self.p1.slams + self.p2.slams
-            score += self.config.slam_count_calc()
+            score += self.config.slam_count_calc(slams)
 
-        if self.p1.masters >= self.config.masters_threshold and self.p2.masters >- self.config.masters_threshold:
+        #rewards masters winners meeting
+        if self.p1.masters >= self.config.masters_threshold and self.p2.masters >= self.config.masters_threshold:
             score += self.config.have_masters
             score += self.config.masters_count_calc(((self.p1.masters + self.p2.masters)))
 
+        #score similar career highs
+        if abs(self.p1.career_high-self.p2.career_high) <= self.config.CH_diff:
+            score += (1-((self.p1.career_high-self.p2.career_high)/self.config.CH_diff)) * self.config.CH_similarity
+
+        #score similar ranks
+        if abs(self.p1.rank-self.p2.rank) <= self.config.rank_diff:
+            score += (1-((self.p1.rank-self.p2.rank)/self.config.rank_diff)) * self.config.rank_similarity
+
+        #score either same generation or generational gap. Does not reward adjacent gens
+        score += (pow((float(abs(self.p1.age-self.p2.age))/self.config.generation_size - 2),2)) * self.config.generation_score
+
+        #TODO need to score ELO
+
         print(score, " score")
-        # TODO: score slams, masters, career high, rank, streak, age
+        # TODO: score slams, masters, career high, rank, streak, age (Only win streak remains)
