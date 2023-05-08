@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from enum import Enum
 from datetime import date
 from dateutil import relativedelta
-
+import reddit
 
 class Player_Url(Enum):
     OVERVIEW = "overview"
@@ -118,9 +118,9 @@ class Player:
             for child in elo_html.body.find_all('table')[3].table.contents[1:]:
                 td_elements = child.find_all('td')
                 test_name = str(td_elements[1].a.text).strip().title().replace(u'\xa0', u' ')
-                print(ascii(test_name),ascii(self.name))
+                #print(ascii(test_name),ascii(self.name))
                 if str(test_name.strip()) == self.name.strip():
-                    self.elo = td_elements[3].contents[0]
+                    self.elo = float(td_elements[3].contents[0])
                     print(self.name,"'s ELO is ",self.elo)
                     break
 

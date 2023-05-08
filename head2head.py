@@ -3,6 +3,7 @@ from typing import Callable
 from player import Player
 from bs4 import BeautifulSoup
 import requests
+import reddit
 
 
 class H2HConfig:
@@ -21,6 +22,11 @@ class H2HConfig:
     rank_similarity = .75
     generation_size:int = 5
     generation_score:float = .75
+    elo_score:float = 1.25
+    elo_gap:int = 300
+    thread_score:float = .25
+    comment_inc: int = 300
+    comment_score:float = .2
 
     def __init__(self):
         self.slam_count_calc = self.default_slam_count
@@ -124,7 +130,12 @@ class Head2Head:
         #score either same generation or generational gap. Does not reward adjacent gens
         score += (pow((float(abs(self.p1.age-self.p2.age))/self.config.generation_size - 2),2)) * self.config.generation_score
 
-        #TODO need to score ELO
-
-        print(score, " score")
-        # TODO: score slams, masters, career high, rank, streak, age (Only win streak remains)
+        #score elo
+        score += max((1 - ((abs(self.p1.elo - self.p2.elo))/self.config.elo_gap) * self.config.elo_score),0)
+        
+        #score reddits
+        (t,c) = reddit.search_reddit(self.p1_name,self.p2_name)
+        score += t * self.config.thread_score
+        score += (c/self.config.comment_inc) * self.config.comment_score
+        
+        print('%3f' %(score), " score")
