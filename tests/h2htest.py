@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch
 from player import Player
+import head2head
 
 
 class MyTestCase(unittest.TestCase):
@@ -14,6 +15,14 @@ class MyTestCase(unittest.TestCase):
             Sascha = Player("Sascha Zverev")
             self.assertEqual(Sascha.name,"Alexander Zverev")
 
+    def test_slam_count(self):
+        self.assertEqual(Player("Roger Federer").slams, 20)
+        self.assertEqual(Player("Gael Monfils").slams, 0)
+
+    def test_fedal(self):
+        fedal = head2head.Head2Head(Player("Roger Federer"),Player("Rafael Nadal"))
+        fedal.eval()
+        self.assertTrue(fedal.score >= 10, "1 Fedal = " + str(fedal.score))
 
 if __name__ == '__main__':
     unittest.main()

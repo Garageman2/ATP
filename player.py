@@ -17,7 +17,6 @@ class Player_Url(Enum):
     RANKINGS_BREAKDOWN = "rankings_breakdown"
 
 
-
 class Player:
 
     country = None
@@ -31,7 +30,6 @@ class Player:
     active:bool = True
     elo:float = 0
 
-    #TODO: set config to headless for release
     @staticmethod
     def query_player(name: str):
         base = "https://www.atptour.com/en/players"
@@ -51,6 +49,7 @@ class Player:
         return self.base_url + "/" + variant.value
 
     def __init__(self, name: str) -> object:
+        self.titles = []
         found = False
         while not found:
             self.name = name
@@ -99,7 +98,7 @@ class Player:
         self.base_url = self.base_url[:-9]
         self.uuid = self.base_url[-4:]
         html = BeautifulSoup(requests.get(self.swap_link(Player_Url.TITLES_FINALS)).text,features='html.parser')
-        for link in [x for x in html.find(id="singlesTitles").descendants if x.name=="a"]:
+        for link in [x for x in html.find(id="singlesTitles").descendants if x.name =="a"]:
             self.titles.append(link.contents[0].strip())
         for title in self.titles:
             match title:
@@ -123,7 +122,6 @@ class Player:
                     self.elo = float(td_elements[3].contents[0])
                     print(self.name,"'s ELO is ",self.elo)
                     break
-
 
     def __str__(self):
         return self.name + " is " + str(self.age) + " and has " + str(self.slams + self.masters) + " major titles and an ELO of" + str(self.elo);
