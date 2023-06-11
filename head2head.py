@@ -85,12 +85,11 @@ class Head2Head:
                 next(iterc)
                 next(iterc)
                 if next(iterc).text.strip() in ["QF", "SF", "F"]: self.late_round += 1
-            print(self.late_round)
 
     def __str__(self):
         return self.p1_name + " has a h2h of " + str(self.p1_wins) + " - " + str(self.p2_wins) + " with " + self.p2_name
 
-    def eval(self) -> int:
+    def eval(self) -> float:
         score = 0
 
         # metric to measure equality of head to head
@@ -138,4 +137,4 @@ class Head2Head:
         score += t * self.config.thread_score
         score += (c/self.config.comment_inc) * self.config.comment_score
         
-        print('%3f' %(score), " score")
+        return score

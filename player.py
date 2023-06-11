@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from enum import Enum
 from datetime import date
 from dateutil import relativedelta
-import reddit
+
 
 class Player_Url(Enum):
     OVERVIEW = "overview"
@@ -17,19 +17,10 @@ class Player_Url(Enum):
     RANKINGS_BREAKDOWN = "rankings_breakdown"
 
 
+
 class Player:
 
-    country = None
-    hand = None
-    backhand = None
-    titles = []
-    slams = 0
-    masters = 0
-    career_high = 0
-    web_name = None
-    active:bool = True
-    elo:float = 0
-
+    #TODO: set config to headless for release
     @staticmethod
     def query_player(name: str):
         base = "https://www.atptour.com/en/players"
@@ -49,7 +40,17 @@ class Player:
         return self.base_url + "/" + variant.value
 
     def __init__(self, name: str) -> object:
+
+        self.country = None
+        self.hand = None
+        self.backhand = None
         self.titles = []
+        self.slams = 0
+        self.masters = 0
+        self.career_high = 0
+        self.web_name = None
+        self.active: bool = True
+        self.elo: float = 0
         found = False
         while not found:
             self.name = name
@@ -76,7 +77,10 @@ class Player:
                     case ["table-value"]:
                         match edit_var:
                             case self.country:
-                                self.country = div.contents[0].split(", ")[1]
+                                try:
+                                    self.country = div.contents[0].split(", ")[-1]
+                                except IndexError:
+                                    self.country = None
                             case self.hand:
                                 self.hand = div.contents[0].strip().split("-")[0]
                                 self.backhand = div.contents[0].strip().split(" ")[1].strip()
@@ -98,7 +102,7 @@ class Player:
         self.base_url = self.base_url[:-9]
         self.uuid = self.base_url[-4:]
         html = BeautifulSoup(requests.get(self.swap_link(Player_Url.TITLES_FINALS)).text,features='html.parser')
-        for link in [x for x in html.find(id="singlesTitles").descendants if x.name =="a"]:
+        for link in [x for x in html.find(id="singlesTitles").descendants if x.name=="a"]:
             self.titles.append(link.contents[0].strip())
         for title in self.titles:
             match title:
@@ -117,11 +121,10 @@ class Player:
             for child in elo_html.body.find_all('table')[3].table.contents[1:]:
                 td_elements = child.find_all('td')
                 test_name = str(td_elements[1].a.text).strip().title().replace(u'\xa0', u' ')
-                #print(ascii(test_name),ascii(self.name))
                 if str(test_name.strip()) == self.name.strip():
                     self.elo = float(td_elements[3].contents[0])
-                    print(self.name,"'s ELO is ",self.elo)
                     break
 
+
     def __str__(self):
-        return self.name + " is " + str(self.age) + " and has " + str(self.slams + self.masters) + " major titles and an ELO of" + str(self.elo);
+        return self.name + " is " + str(self.age) + " and has " + str(self.slams + self.masters) + " major titles and an ELO of " + str(self.elo);
